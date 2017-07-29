@@ -23,11 +23,15 @@
   - name: Create config directory
     file: path=~/.config/ state=directory
 
-  - name: Git configs
-    git: repo=https://github.com/bbkane/backup.git dest=~/backup
+  # Commenting this out because I'm making local modifications to it
+  # - name: Git configs
+  #   git: repo=https://github.com/bbkane/backup.git dest=~/backup
 
   - name: Stow common
-    command: stow common chdir=~/backup
+    command: stow common
+    args:
+      chdir: ~/backup
+      creates: ~/.gitconfig
 
   - name: Git nvim config
     git: repo=https://github.com/bbkane/nvim.git dest=~/.config/nvim
@@ -72,3 +76,18 @@
     become: true
     alternatives: name=editor path=/usr/bin/nvim link=/usr/bin/editor
 
+  - name: Check if VS-Code is installed
+    command: which code
+    register: vscode_installed
+    ignore_errors: true
+  - name: Install Visual Studio Code
+    become: true
+    when: vscode_installed|failed
+    apt:
+      # https://code.visualstudio.com/download
+      deb: https://go.microsoft.com/fwlink/?LinkID=760868
+  - name: Symlink VSCode Settings
+    command: python install_vs_code_settings.py --batch
+    args:
+      chdir: ~/backup/vscode/
+      creates: ~/.config/Code/User/settings.json
