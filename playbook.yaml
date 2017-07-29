@@ -12,11 +12,12 @@
     become: true
     apt: name={{item}} state=latest
     with_items:
-    # think this enables copy-paste between guest/host
     - git
     - ansible
     - firefox
     - stow
+    - entr # Cross-platform file-watcher
+    - build-essential
 
     # need to create a config directory so stow doesn't create item
     # as a symlink
@@ -91,3 +92,10 @@
     args:
       chdir: ~/backup/vscode/
       creates: ~/.config/Code/User/settings.json
+  - name: Install NodeJS for VSCode
+    become: true
+    apt: name={{item}} state=latest
+    with_items:
+    # TODO: maybe install this with a PPA
+    - nodejs
+    - npm
