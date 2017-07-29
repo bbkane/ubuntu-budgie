@@ -7,6 +7,7 @@
     apt:
       update_cache: true
       cache_valid_time: 1500
+
   - name: Install basics
     become: true
     apt: name={{item}} state=latest
@@ -16,29 +17,34 @@
     - ansible
     - firefox
     - stow
-    # Need this so adding Neovim's repo works
-    - software-properties-common
-    # This is needes to apt can update the cache on Nvim install
-    # https://github.com/ansible/ansible/issues/18987
-    - aptitude
 
     # need to create a config directory so stow doesn't create item
     # as a symlink
   - name: Create config directory
     file: path=~/.config/ state=directory
+
   - name: Git configs
     git: repo=https://github.com/bbkane/backup.git dest=~/backup
-  # - name: Stow ubuntu-term
-  #   command: stow ubuntu-term chdir=~/backup
+
   - name: Stow common
     command: stow common chdir=~/backup
 
   - name: Git nvim config
     git: repo=https://github.com/bbkane/nvim.git dest=~/.config/nvim
+
   # # As of 2017-07-29, this Neovim installation by Ansible fails
   # # Still works manually, though it complains
   # # apt_repository: repo='ppa:neovim-ppa/stable'
   # # stable is only for 16.04 :(
+  # - name: Install Neovim Ansible apt workarounds
+  #   become: true
+  #   apt: name={{item}} state=latest
+  #   with_items:
+  #   # Need this so adding Neovim's repo works
+  #   - software-properties-common
+  #   # This is needes to apt can update the cache on Nvim install
+  #   # https://github.com/ansible/ansible/issues/18987
+  #   - aptitude
   # - name: Add Neovim Repo
   #   become: true
   # apt_repository: repo='ppa:neovim-ppa/unstable' state=absent
@@ -49,15 +55,19 @@
   # - python3-dev
   # - python3-pip
   # - neovim
+
   - name: Install Neovim pip module
     become: true
     pip: name=neovim executable=pip3
+
   - name: Create Neovim config directory
     file: path=~/.config/nvim/autoload state=directory
+
   - name: Install plug.vim
     get_url: >
       url=https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim
       dest=~/.config/nvim/autoload/plug.vim
+
   - name: Update Editor
     become: true
     alternatives: name=editor path=/usr/bin/nvim link=/usr/bin/editor
