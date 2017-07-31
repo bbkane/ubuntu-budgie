@@ -18,6 +18,20 @@
     - stow
     - entr # Cross-platform file-watcher
     - build-essential
+    - clang-4.0
+
+  - name: Symlink clang++-4.0 to clang++
+    become: true
+    file:
+      src: /usr/bin/clang++-4.0
+      dest: /usr/bin/clang++
+      state: link
+  - name: Symlink clang-4.0 to clang
+    become: true
+    file:
+      src: /usr/bin/clang-4.0
+      dest: /usr/bin/clang
+      state: link
 
     # need to create a config directory so stow doesn't create item
     # as a symlink
@@ -99,3 +113,17 @@
     # TODO: maybe install this with a PPA
     - nodejs
     - npm
+
+  # TODO: make symlink from nodjs to node so TypeScript can find it
+  - name: Symlink nodejs to node
+    become: true
+    file:
+      src: /usr/bin/nodejs
+      dest: /usr/bin/node
+      state: link
+
+  - name: Install TypeScript
+    become: true
+    npm:
+      name: typescript
+      global: yes
