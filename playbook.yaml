@@ -19,6 +19,7 @@
     - entr # Cross-platform file-watcher
     - build-essential
     - clang-4.0
+    - variety # wallpaper manager
 
   - name: Symlink clang++-4.0 to clang++
     become: true
@@ -110,7 +111,7 @@
     become: true
     apt: name={{item}} state=latest
     with_items:
-    # TODO: maybe install this with a PPA
+    # TODO: maybe install this with a PPA or nvm
     - nodejs
     - npm
 
@@ -127,3 +128,37 @@
     npm:
       name: typescript
       global: yes
+
+  - name: Install RVM Dependencies
+    become: true
+    apt:
+      name: software-properties-common
+      state: latest
+  - name: Add PPA
+    become: true
+    apt_repository:
+      repo: 'ppa:rael-gc/rvm'
+      update_cache: false # Neovim PPA means this won't work... I'll do it manually for now
+  - name: Add RVM
+    become: true
+    apt:
+      name: rvm
+  - name: Add bkane to RVM group
+    become: true
+    user:
+      name: bkane
+      groups: rvm
+      append: true
+  # Note: Need to restart to make sure I'm part of the group
+  #
+  # Note: after Ansible 2.3, use path instead of dest
+  # Note: if there is no unique mark, block will overwrite each other
+  - name: Source common.sh in .bashrc
+    blockinfile:
+      dest: ~/.bashrc
+      block: |
+        # Source common config
+        source ~/.config/common.sh
+        # TODO: put this in machine.sh
+        # Source rvm to use ruby
+        source /usr/share/rvm/scripts/rvm
