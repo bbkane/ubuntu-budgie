@@ -20,6 +20,7 @@
     - build-essential
     - clang-4.0
     - variety # wallpaper manager
+    - p7zip-full
 
   - name: Symlink clang++-4.0 to clang++
     become: true
@@ -162,3 +163,21 @@
         # TODO: put this in machine.sh
         # Source rvm to use ruby
         source /usr/share/rvm/scripts/rvm
+  - name: Install dropbox
+    shell: curl -L "https://www.dropbox.com/download?plat=lnx.x86_64" | tar -C $HOME -xzf -
+    args:
+      creates: ~/.dropbox-dist/dropboxd
+    # For now, I'm just always going to manually start it...
+    # TODO: add systemd start and enable here
+
+  # TODO: add Anaconda install
+
+  # https://rg3.github.io/youtube-dl/download.html
+  - name: Install youtube-dl
+    become: true # I'm installing to /usr/local/bin
+    get_url:
+      url: https://yt-dl.org/downloads/latest/youtube-dl
+      dest: /usr/local/bin/youtube-dl
+      mode: a+rx
+      # NOTE: this is for the 2017-08-13 version
+      checksum: sha256:94419dbb390bddcb7582312398ea6fa3bce9ea8d9cc5f0092fab85e79d900579
