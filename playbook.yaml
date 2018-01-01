@@ -21,6 +21,9 @@
     - clang-4.0
     - variety # wallpaper manager
     - p7zip-full
+    - default-jdk # Java
+    - pandoc
+    - mit-scheme
 
   - name: Symlink clang++-4.0 to clang++
     become: true
@@ -49,6 +52,13 @@
     args:
       chdir: ~/backup
       creates: ~/.gitconfig
+
+  - name: Stow ubuntu-budgie configs
+    command: stow ubuntu-budgie
+    args:
+      chdir: ~/backup
+      # NOTE: this is very specific to my docking setup...
+      creates: ~/.config/autostart/fix-desktop-display.desktop
 
   - name: Git nvim config
     git: repo=https://github.com/bbkane/nvim.git dest=~/.config/nvim
@@ -108,38 +118,40 @@
     args:
       chdir: ~/backup/vscode/
       creates: ~/.config/Code/User/settings.json
-  - name: Install NodeJS for VSCode
-    become: true
-    apt: name={{item}} state=latest
-    with_items:
-    # TODO: maybe install this with a PPA or nvm
-    - nodejs
-    - npm
 
-  # TODO: make symlink from nodjs to node so TypeScript can find it
-  - name: Symlink nodejs to node
-    become: true
-    file:
-      src: /usr/bin/nodejs
-      dest: /usr/bin/node
-      state: link
+  # TODO: Use nvm instead of this!!!
+  # - name: Install NodeJS for VSCode
+  #   become: true
+  #   apt: name={{item}} state=latest
+  #   with_items:
+  #   # TODO: maybe install this with a PPA or nvm
+  #   - nodejs
+  #   - npm
 
-  - name: Install TypeScript
-    become: true
-    npm:
-      name: typescript
-      global: yes
+  # # TODO: make symlink from nodjs to node so TypeScript can find it
+  # - name: Symlink nodejs to node
+  #   become: true
+  #   file:
+  #     src: /usr/bin/nodejs
+  #     dest: /usr/bin/node
+  #     state: link
+
+  # - name: Install TypeScript
+  #   become: true
+  #   npm:
+  #     name: typescript
+  #     global: yes
 
   - name: Install RVM Dependencies
     become: true
     apt:
       name: software-properties-common
       state: latest
-  - name: Add PPA
+  - name: Add rvm PPA
     become: true
     apt_repository:
       repo: 'ppa:rael-gc/rvm'
-      update_cache: false # Neovim PPA means this won't work... I'll do it manually for now
+      update_cache: true
   - name: Add RVM
     become: true
     apt:
@@ -180,4 +192,42 @@
       dest: /usr/local/bin/youtube-dl
       mode: a+rx
       # NOTE: this is for the 2017-08-13 version
-      checksum: sha256:94419dbb390bddcb7582312398ea6fa3bce9ea8d9cc5f0092fab85e79d900579
+      checksum: sha256:692e818ba99cd503914e6349f2d6080286cbe19505e4ed013dd52ea48d9f82bf
+  - name: Add Lyx PPA
+    become: true
+    apt_repository:
+      repo: 'ppa:lyx-devel/release'
+      update_cache: true
+  - name: Add Lyx
+    become: true
+    apt:
+      name: lyx
+
+  # Or just wait until next time and install it then...
+  # Finish this by installing it, using file_stats.py, and seeing what changed
+  # # NOTE: TODO: rm this and use the url source in unarchive:
+  # # http://docs.ansible.com/ansible/latest/unarchive_module.html
+  # - name: Download IntelliJ Idea
+  #   get_url:
+  #     url: https://download.jetbrains.com/idea/ideaIC-2017.2.2.tar.gz
+  #     dest: ~/Downloads/ideaIC-2017.2.2.tar.gz
+  # - name: Unarchive it
+  #   unarchive:
+  #     src: ~/Downloads/ideaIC-2017.2.2.tar.gz
+  #     dest:
+
+  # So this installed it, but it's still not the default window manager
+  # I can log into it from the lock screen
+  # This is much less necessary now that I know how to move between workspaces
+  - name: Add i3
+    become: true
+    apt:
+      name: i3
+  - name: Make it the default window manager
+    become: true
+    alternatives:
+      name: x-window-manager
+      path: /usr/bin/i3
+      link: /usr/bin/x-window-manager
+
+  # TODO: install virtualbox and vagrant. I'm doing it manually now
