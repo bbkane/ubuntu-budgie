@@ -1,1 +1,4 @@
-*.retry
+ssh_config
+.vagrant/
+hosts.ini
+

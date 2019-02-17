@@ -29,7 +29,7 @@ end
 
 Vagrant.configure('2') do |config|
   # set settings common to all VMs
-  config.vm.box = 'centos/7'
+  config.vm.box = 'generic/ubuntu1804'
   # Disable the default synced folder because it's too much trouble to set up
   config.vm.synced_folder '.', '/vagrant', disabled: true
   config.vm.synced_folder '.', '/home/vagrant/sync', disabled: true
